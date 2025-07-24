@@ -10,7 +10,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json",
 client = gspread.authorize(creds)
 
 # Mở Google Sheet
-sheet = client.open_by_key("YOUR_GOOGLE_SHEET_ID").sheet1
+sheet = client.open_by_key("1QNOHfJw3kRAC5BSfb0YsEfYzhWDYdEFi0L4Rk1t141A").sheet1
 
 st.title("📦 Quản lý vật tư - Xuất Nhập Tồn")
 
