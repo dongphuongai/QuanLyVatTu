@@ -17,7 +17,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(
 client = gspread.authorize(creds)
 
 # Mở file Google Sheet và một sheet cụ thể
-sheet = client.open("1QNOHfJw3kRAC5BSfb0YsEfYzhWDYdEFi0L4Rk1t141A").worksheet("XuatNhapTon")
+sheet = client.open_by_key("1QNOHfJw3kRAC5BSfb0YsEfYzhWDYdEFi0L4Rk1t141A").worksheet("XuatNhapTon")
 
 # Lấy toàn bộ dữ liệu
 data = sheet.get_all_records()
