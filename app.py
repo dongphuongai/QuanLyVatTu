@@ -1,30 +1,27 @@
 import streamlit as st
-import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from gspread_dataframe import set_with_dataframe
 
-# Thiết lập quyền truy cập Google Sheets
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+# Cấu hình quyền truy cập Google Sheet
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Lấy thông tin từ secrets
+creds = ServiceAccountCredentials.from_json_keyfile_dict(
+    st.secrets["service_account"], scope
+)
+
+# Kết nối đến Google Sheet
 client = gspread.authorize(creds)
 
-# Mở Google Sheet
-sheet = client.open_by_key("1QNOHfJw3kRAC5BSfb0YsEfYzhWDYdEFi0L4Rk1t141A").sheet1
+# Mở file Google Sheet và một sheet cụ thể
+sheet = client.open("1QNOHfJw3kRAC5BSfb0YsEfYzhWDYdEFi0L4Rk1t141A").worksheet("XuatNhapTon")
 
-st.title("📦 Quản lý vật tư - Xuất Nhập Tồn")
+# Lấy toàn bộ dữ liệu
+data = sheet.get_all_records()
 
-uploaded_file = st.file_uploader("Upload file Excel", type=["xlsx"])
-
-if uploaded_file:
-    df = pd.read_excel(uploaded_file)
-
-    # Tính tồn
-    df["Tồn"] = df["Nhập"] - df["Xuất"]
-
-    st.subheader("📄 Dữ liệu tính toán:")
-    st.dataframe(df)
-
-    # Ghi lên Google Sheet
-    set_with_dataframe(sheet, df)
-    st.success("✅ Dữ liệu đã được ghi vào Google Sheets!")
+# Hiển thị dữ liệu trên giao diện web
+st.title("Dữ liệu từ Google Sheet")
+st.write(data)
