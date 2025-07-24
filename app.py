@@ -1,26 +1,35 @@
+import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
-import streamlit as st
+import pandas as pd
+import toml
 
-# Kết nối Google Sheet
+# Load credentials from .toml file
+secrets = toml.load(".streamlit/secrets.toml")["gcp_service_account"]
+
+# Set up credentials
+scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+credentials = Credentials.from_service_account_info(secrets, scopes=scopes)
+
+# Connect to Google Sheets
 try:
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_file("service_account.json", scopes=scope)
-    client = gspread.authorize(creds)
-
-    sheet_id = "1QNOHfJw3kRAC5BSfb0YsEfYzhWDYdEFi0L4Rk1t141A"
-    sheet_tab = "XuatNhapTon"
-
-    worksheet = client.open_by_key(sheet_id).worksheet(sheet_tab)
+    gc = gspread.authorize(credentials)
+    sh = gc.open("QuanLyVatTu")  # ⚠️ Thay bằng tên thực tế
+    worksheet = sh.XuatNhapTon
 except Exception as e:
     st.error("❌ Không thể kết nối Google Sheet.")
     st.stop()
 
-# Xóa dữ liệu (nếu bạn cần)
-try:
-    worksheet.clear()
-    st.success("✅ Đã xóa dữ liệu.")
-except Exception as e:
-    st.error(f"Không thể xóa: {e}")
+# Streamlit App UI
+st.title("📦 Quản Lý Vật Tư")
+uploaded_file = st.file_uploader("📥 Tải lên file Excel", type=["xlsx"])
 
+if uploaded_file:
+    df = pd.read_excel(uploaded_file)
+    st.write("✅ Dữ liệu vừa tải lên:")
+    st.dataframe(df)
 
+    if st.button("📤 Gửi dữ liệu lên Google Sheet"):
+        worksheet.clear()  # Xóa dữ liệu cũ
+        worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+        st.success("✅ Đã gửi dữ liệu lên Google Sheet thành công!")
